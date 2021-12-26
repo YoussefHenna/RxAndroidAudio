@@ -61,7 +61,7 @@ public final class StreamAudioRecorder {
         return StreamAudioRecorderHolder.INSTANCE;
     }
 
-    public synchronized boolean start(@NonNull AudioDataCallback audioDataCallback) {
+    public synchronized AudioRecord start(@NonNull AudioDataCallback audioDataCallback) {
         return start(DEFAULT_SAMPLE_RATE, AudioFormat.CHANNEL_IN_MONO,
                 AudioFormat.ENCODING_PCM_16BIT, DEFAULT_BUFFER_SIZE, audioDataCallback);
     }
@@ -77,7 +77,7 @@ public final class StreamAudioRecorder {
         mExecutorService = Executors.newSingleThreadExecutor();
         if (mIsRecording.compareAndSet(false, true)) {
             AudioRecordRunnable runnable = new AudioRecordRunnable(sampleRate, channelConfig, audioFormat, bufferSize,
-                    audioDataCallback)
+                    audioDataCallback);
             mExecutorService.execute(runnable);
             return runnable.getAudioRecord();
         }
@@ -135,7 +135,7 @@ public final class StreamAudioRecorder {
         }
 
         public AudioRecord getAudioRecord(){
-            return mAudioRecord
+            return mAudioRecord;
         }
 
         @Override
