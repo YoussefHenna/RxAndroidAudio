@@ -70,18 +70,18 @@ public final class StreamAudioRecorder {
      * AudioFormat.CHANNEL_IN_MONO
      * AudioFormat.ENCODING_PCM_16BIT
      */
-    public synchronized boolean start(int sampleRate, int channelConfig, int audioFormat,
+    public synchronized AudioRecord start(int sampleRate, int channelConfig, int audioFormat,
             int bufferSize, @NonNull AudioDataCallback audioDataCallback) {
         stop();
 
         mExecutorService = Executors.newSingleThreadExecutor();
         if (mIsRecording.compareAndSet(false, true)) {
-            mExecutorService.execute(
-                    new AudioRecordRunnable(sampleRate, channelConfig, audioFormat, bufferSize,
-                            audioDataCallback));
-            return true;
+            AudioRecordRunnable runnable = new AudioRecordRunnable(sampleRate, channelConfig, audioFormat, bufferSize,
+                    audioDataCallback)
+            mExecutorService.execute(runnable);
+            return runnable.getAudioRecord();
         }
-        return false;
+        return null;
     }
 
     public synchronized void stop() {
@@ -132,6 +132,10 @@ public final class StreamAudioRecorder {
             mAudioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, sampleRate, channelConfig,
                     audioFormat, Math.max(minBufferSize, byteBufferSize));
             mAudioDataCallback = audioDataCallback;
+        }
+
+        public AudioRecord getAudioRecord(){
+            return mAudioRecord
         }
 
         @Override
